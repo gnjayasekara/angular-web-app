@@ -1,0 +1,10 @@
+# .NET build output
+bin/
+obj/
+appsettings.Development.json
+appsettings.json
+
+# Visual Studio
+.vs/
+*.user
+*.suo
