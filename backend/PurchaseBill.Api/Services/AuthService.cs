@@ -12,13 +12,16 @@ public class AuthService : IAuthService
 {
     private readonly HttpClient _httpClient;
     private readonly ExternalApiSettings _externalApiSettings;
+    private readonly ILocationService _locationService;
 
     public AuthService(
         HttpClient httpClient,
-        IOptions<ExternalApiSettings> externalApiOptions)
+        IOptions<ExternalApiSettings> externalApiOptions,
+        ILocationService locationService)
     {
         _httpClient = httpClient;
         _externalApiSettings = externalApiOptions.Value;
+        _locationService = locationService;
     }
 
     public async Task<ExternalLoginResponseDto> LoginAsync(
@@ -33,7 +36,6 @@ public class AuthService : IAuthService
             ApiAction = "GetLoginData",
             DeviceId = "D001",
             SyncTime = "",
-
             CompanyCode = loginRequest.CompanyCode.Trim(),
 
             ApiBody = new ExternalLoginBodyDto
@@ -44,8 +46,6 @@ public class AuthService : IAuthService
         };
 
         var json = JsonSerializer.Serialize(externalRequest);
-
-        Console.WriteLine($"External API URL: {url}");
 
         using var request = new HttpRequestMessage(
             HttpMethod.Post,
@@ -66,9 +66,6 @@ public class AuthService : IAuthService
 
         var responseBody =
             await response.Content.ReadAsStringAsync();
-
-        Console.WriteLine($"HTTP Status: {response.StatusCode}");
-        Console.WriteLine($"External Response: {responseBody}");
 
         if (!response.IsSuccessStatusCode)
         {
@@ -93,6 +90,16 @@ public class AuthService : IAuthService
         {
             throw new UnauthorizedAccessException(
                 loginResponse.Message ?? "Login failed."
+            );
+        }
+
+        var user = loginResponse.ResponseBody?.FirstOrDefault();
+
+        if (user is not null)
+        {
+            await _locationService.SyncLocationsAsync(
+                user.CompanyCode,
+                user.UserLocations
             );
         }
 

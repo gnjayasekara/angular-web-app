@@ -25,6 +25,8 @@ builder.Services.AddHttpClient();
 // Register authentication service
 builder.Services.AddScoped<IAuthService, AuthService>();
 
+builder.Services.AddScoped<ILocationService, LocationService>();
+
 // OpenAPI
 builder.Services.AddOpenApi();
 
