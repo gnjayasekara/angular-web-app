@@ -11,6 +11,10 @@ public class AppDbContext : DbContext
     }
 
     public DbSet<LocationDetail> LocationDetails { get; set; }
+    
+    public DbSet<PurchaseBill> PurchaseBills { get; set; }
+
+    public DbSet<PurchaseBillItem> PurchaseBillItems { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -46,6 +50,52 @@ public class AppDbContext : DbContext
                 x.LocationCode
             })
             .IsUnique();
+        });
+
+        modelBuilder.Entity<PurchaseBill>(entity =>
+        {
+            entity.ToTable("Purchase_Bills");
+
+            entity.HasKey(x => x.Id);
+        });
+
+        modelBuilder.Entity<PurchaseBillItem>(entity =>
+        {
+            entity.ToTable("Purchase_Bill_Items");
+
+            entity.HasKey(x => x.Id);
+
+            entity.Property(x => x.ItemName)
+                .IsRequired()
+                .HasMaxLength(100);
+
+            entity.Property(x => x.LocationCode)
+                .IsRequired()
+                .HasMaxLength(100);
+
+            entity.Property(x => x.BatchName)
+                .IsRequired()
+                .HasMaxLength(200);
+
+            entity.Property(x => x.StandardCost)
+                .HasColumnType("decimal(18,2)");
+
+            entity.Property(x => x.StandardPrice)
+                .HasColumnType("decimal(18,2)");
+
+            entity.Property(x => x.DiscountPercentage)
+                .HasColumnType("decimal(5,2)");
+
+            entity.Property(x => x.TotalCost)
+                .HasColumnType("decimal(18,2)");
+
+            entity.Property(x => x.TotalSelling)
+                .HasColumnType("decimal(18,2)");
+
+            entity.HasOne(x => x.PurchaseBill)
+                .WithMany(x => x.Items)
+                .HasForeignKey(x => x.PurchaseBillId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
     }
 }
