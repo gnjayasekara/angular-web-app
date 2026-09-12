@@ -1,8 +1,11 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PurchaseBill.Api.Data;
+using Microsoft.AspNetCore.Authorization;
 
 namespace PurchaseBill.Api.Controllers;
+
+[Authorize]
 
 [ApiController]
 [Route("api/locations")]

@@ -1,8 +1,11 @@
 using Microsoft.AspNetCore.Mvc;
 using PurchaseBill.Api.DTOs.PurchaseBills;
 using PurchaseBill.Api.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 
 namespace PurchaseBill.Api.Controllers;
+
+[Authorize]
 
 [ApiController]
 [Route("api/purchase-bills")]

@@ -13,15 +13,18 @@ public class AuthService : IAuthService
     private readonly HttpClient _httpClient;
     private readonly ExternalApiSettings _externalApiSettings;
     private readonly ILocationService _locationService;
+    private readonly ITokenService _tokenService;
 
     public AuthService(
         HttpClient httpClient,
         IOptions<ExternalApiSettings> externalApiOptions,
-        ILocationService locationService)
+        ILocationService locationService,
+        ITokenService tokenService)
     {
         _httpClient = httpClient;
         _externalApiSettings = externalApiOptions.Value;
         _locationService = locationService;
+        _tokenService = tokenService;
     }
 
 
@@ -109,8 +112,11 @@ public class AuthService : IAuthService
             user.UserLocations
         );
 
+        var token = _tokenService.GenerateToken(user);
+
         return new LoginResponseDto
         {
+            Token = token,
             UserCode = user.UserCode,
             DisplayName = user.UserDisplayName,
             Email = user.Email,
