@@ -6,6 +6,17 @@ using PurchaseBill.Api.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("FrontendPolicy", policy =>
+    {
+        policy
+            .WithOrigins("http://localhost:4200")
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
+
 // Add controller support
 builder.Services.AddControllers();
 
@@ -38,6 +49,8 @@ using (var scope = app.Services.CreateScope())
 
     await dbContext.Database.MigrateAsync();
 }
+
+app.UseCors("FrontendPolicy");
 
 // Development OpenAPI endpoint
 if (app.Environment.IsDevelopment())

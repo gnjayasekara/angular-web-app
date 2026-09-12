@@ -24,7 +24,8 @@ public class AuthService : IAuthService
         _locationService = locationService;
     }
 
-    public async Task<ExternalLoginResponseDto> LoginAsync(
+
+    public async Task<LoginResponseDto> LoginAsync(
         LoginRequestDto loginRequest)
     {
         var url =
@@ -95,14 +96,36 @@ public class AuthService : IAuthService
 
         var user = loginResponse.ResponseBody?.FirstOrDefault();
 
-        if (user is not null)
+        
+        if (user is null)
         {
-            await _locationService.SyncLocationsAsync(
-                user.CompanyCode,
-                user.UserLocations
+            throw new InvalidOperationException(
+                "External API returned no user data."
             );
         }
 
-        return loginResponse;
+        await _locationService.SyncLocationsAsync(
+            user.CompanyCode,
+            user.UserLocations
+        );
+
+        return new LoginResponseDto
+        {
+            UserCode = user.UserCode,
+            DisplayName = user.UserDisplayName,
+            Email = user.Email,
+            CompanyCode = user.CompanyCode,
+            Locations = user.UserLocations.Select(location =>
+                new LoginLocationDto
+                {
+                    LocationCode = location.LocationCode,
+                    LocationName = location.LocationName,
+                    StockHandle = location.StockHandle,
+                    Address = location.Address,
+                    Phone = location.Phone,
+                    Status = location.Status
+                })
+                .ToList()
+        };
     }
 }

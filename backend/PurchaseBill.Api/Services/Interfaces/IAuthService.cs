@@ -4,7 +4,5 @@ namespace PurchaseBill.Api.Services.Interfaces;
 
 public interface IAuthService
 {
-    Task<ExternalLoginResponseDto> LoginAsync(
-        LoginRequestDto loginRequest
-    );
+    Task<LoginResponseDto> LoginAsync(LoginRequestDto loginRequest);
 }
