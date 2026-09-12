@@ -38,6 +38,8 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 
 builder.Services.AddScoped<ILocationService, LocationService>();
 
+builder.Services.AddScoped<IPurchaseBillService, PurchaseBillService>();
+
 // OpenAPI
 builder.Services.AddOpenApi();
 

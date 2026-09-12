@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using PurchaseBill.Api.Models;
+using PurchaseBillModel = PurchaseBill.Api.Models.PurchaseBill;
 
 namespace PurchaseBill.Api.Data;
 
@@ -12,7 +13,7 @@ public class AppDbContext : DbContext
 
     public DbSet<LocationDetail> LocationDetails { get; set; }
     
-    public DbSet<PurchaseBill> PurchaseBills { get; set; }
+    public DbSet<PurchaseBillModel> PurchaseBills { get; set; }
 
     public DbSet<PurchaseBillItem> PurchaseBillItems { get; set; }
 
@@ -52,7 +53,7 @@ public class AppDbContext : DbContext
             .IsUnique();
         });
 
-        modelBuilder.Entity<PurchaseBill>(entity =>
+        modelBuilder.Entity<PurchaseBillModel>(entity =>
         {
             entity.ToTable("Purchase_Bills");
 
