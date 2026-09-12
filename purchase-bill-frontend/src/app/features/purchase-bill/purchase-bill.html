@@ -1,1 +1,249 @@
-<p>purchase-bill works!</p>
+<div class="min-h-screen bg-gray-100 p-6">
+  <div class="max-w-7xl mx-auto bg-white rounded-lg shadow-sm">
+    <div class="border-b px-6 py-4">
+      <h1 class="text-2xl font-semibold">Purchase Bill</h1>
+      <p class="text-sm text-gray-500">
+        Enter information for the Purchase Bill
+      </p>
+    </div>
+
+    <div class="p-6">
+      <form [formGroup]="purchaseItemForm">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+
+          <!-- Item -->
+          <div class="relative item-autocomplete">
+            <label class="block mb-2 text-sm font-medium">
+                Item <span class="text-red-500">*</span>
+            </label>
+
+            <input
+                type="text"
+                formControlName="item"
+                class="w-full border rounded px-3 py-2"
+                placeholder="Search item"
+                autocomplete="off"
+                (input)="filterItems()"
+                (focus)="filterItems()"
+            />
+
+            @if (showItemSuggestions && filteredItems.length > 0) {
+                <div
+                class="absolute z-20 mt-1 w-full bg-white border rounded shadow-md max-h-48 overflow-y-auto"
+                >
+                @for (item of filteredItems; track item) {
+                    <button
+                    type="button"
+                    class="block w-full text-left px-3 py-2 hover:bg-gray-100"
+                    (click)="selectItem(item)"
+                    >
+                    {{ item }}
+                    </button>
+                }
+                </div>
+            }
+            </div>
+
+          <!-- Batch / Location -->
+          <div>
+            <label class="block mb-2 text-sm font-medium">
+              Batch / Location
+            </label>
+
+            <select
+            formControlName="locationCode"
+            [disabled]="isLoadingLocations"
+            class="w-full border rounded px-3 py-2"
+            >
+              <option value="">
+                    {{ isLoadingLocations ? 'Loading locations...' : 'Select location' }}
+                </option>
+
+              @for (location of locations; track location.id) {
+                <option [value]="location.locationCode">
+                  {{ location.locationName }}
+                </option>
+              }
+            </select>
+
+            @if (isLoadingLocations) {
+              <p class="mt-1 text-sm text-gray-500">
+                Loading locations...
+              </p>
+            }
+
+            @if (locationError) {
+              <p class="mt-1 text-sm text-red-600">
+                {{ locationError }}
+              </p>
+            }
+          </div>
+
+          <!-- Standard Cost -->
+          <div>
+            <label class="block mb-2 text-sm font-medium">
+              Standard Cost
+            </label>
+
+            <input
+              type="number"
+              formControlName="standardCost"
+              class="w-full border rounded px-3 py-2"
+            />
+          </div>
+
+          <!-- Standard Price -->
+          <div>
+            <label class="block mb-2 text-sm font-medium">
+              Standard Price
+            </label>
+
+            <input
+              type="number"
+              formControlName="standardPrice"
+              class="w-full border rounded px-3 py-2"
+            />
+          </div>
+
+          <!-- Quantity -->
+          <div>
+            <label class="block mb-2 text-sm font-medium">
+              Quantity
+            </label>
+
+            <input
+              type="number"
+              formControlName="quantity"
+              class="w-full border rounded px-3 py-2"
+            />
+          </div>
+
+          <!-- Discount -->
+          <div>
+            <label class="block mb-2 text-sm font-medium">
+              Discount
+            </label>
+
+            <input
+              type="number"
+              formControlName="discount"
+              class="w-full border rounded px-3 py-2"
+            />
+          </div>
+
+          <!-- Total Cost -->
+          <div>
+            <label class="block mb-2 text-sm font-medium">
+              Total Cost
+            </label>
+
+            <input
+              type="number"
+              formControlName="totalCost"
+              class="w-full border rounded px-3 py-2 bg-gray-100"
+            />
+          </div>
+
+          <!-- Total Selling -->
+          <div>
+            <label class="block mb-2 text-sm font-medium">
+              Total Selling
+            </label>
+
+            <input
+              type="number"
+              formControlName="totalSelling"
+              class="w-full border rounded px-3 py-2 bg-gray-100"
+            />
+          </div>
+
+        </div>
+
+        <div class="mt-6 flex justify-end">
+          <button
+            type="button"
+            (click)="addItem()"
+            class="px-5 py-2 rounded bg-green-600 text-white"
+            >
+            Add
+            </button>
+        </div>
+      </form>
+    </div>
+    <div class="px-6 pb-6">
+        @if (purchaseItems.length > 0) {
+        <div class="mt-8 overflow-x-auto">
+            <table class="w-full border-collapse">
+            <thead>
+                <tr class="bg-gray-100 text-left">
+                <th class="border px-3 py-2">Item</th>
+                <th class="border px-3 py-2">Batch / Location</th>
+                <th class="border px-3 py-2">Standard Cost</th>
+                <th class="border px-3 py-2">Standard Price</th>
+                <th class="border px-3 py-2">Quantity</th>
+                <th class="border px-3 py-2">Discount</th>
+                <th class="border px-3 py-2">Total Cost</th>
+                <th class="border px-3 py-2">Total Selling</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @for (item of purchaseItems; track $index) {
+                <tr>
+                    <td class="border px-3 py-2">
+                    {{ item.item }}
+                    </td>
+
+                    <td class="border px-3 py-2">
+                    {{ item.locationName }}
+                    </td>
+
+                    <td class="border px-3 py-2">
+                    {{ item.standardCost }}
+                    </td>
+
+                    <td class="border px-3 py-2">
+                    {{ item.standardPrice }}
+                    </td>
+
+                    <td class="border px-3 py-2">
+                    {{ item.quantity }}
+                    </td>
+
+                    <td class="border px-3 py-2">
+                    {{ item.discount }}
+                    </td>
+
+                    <td class="border px-3 py-2">
+                    {{ item.totalCost }}
+                    </td>
+
+                    <td class="border px-3 py-2">
+                    {{ item.totalSelling }}
+                    </td>
+                </tr>
+                }
+            </tbody>
+            </table>
+        </div>
+        }
+        <div class="mt-6 flex justify-end">
+        <div class="w-full max-w-sm border rounded-lg p-4">
+            <h2 class="font-semibold mb-4">
+            Summary
+            </h2>
+
+            <div class="flex justify-between mb-2">
+            <span>Total Items</span>
+            <span>{{ totalItems }}</span>
+            </div>
+
+            <div class="flex justify-between">
+            <span>Total Quantity</span>
+            <span>{{ totalQuantity }}</span>
+            </div>
+        </div>
+        </div>
+        </div>
+  </div>
+</div>
