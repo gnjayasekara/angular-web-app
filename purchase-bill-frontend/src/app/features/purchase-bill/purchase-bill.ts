@@ -13,6 +13,8 @@ import {
 import { LocationService } from '../../core/services/location.service';
 import { Location } from '../../models/location.model';
 
+import { PurchaseBillService } from '../../core/services/purchase-bill.service';
+
 interface PurchaseItemRow {
   item: string;
   locationCode: string;
@@ -35,11 +37,16 @@ interface PurchaseItemRow {
 export class PurchaseBillComponent implements OnInit {
   private fb = inject(FormBuilder);
   private locationService = inject(LocationService);
+  private purchaseBillService = inject(PurchaseBillService);
 
 
   locations: Location[] = [];
   isLoadingLocations = false;
   locationError = '';
+
+  isSubmitting = false;
+  submitSuccess = '';
+  submitError = '';
 
   items = [
     'Mango',
@@ -62,14 +69,19 @@ export class PurchaseBillComponent implements OnInit {
     standardCost: [0, [Validators.required, Validators.min(0)]],
     standardPrice: [0, [Validators.required, Validators.min(0)]],
     quantity: [1, [Validators.required, Validators.min(1)]],
-    discount: [0, [Validators.required, Validators.min(0)]],
+    discount: [ 0, [ Validators.required, Validators.min(0), Validators.max(100), ], ],
     totalCost: [{ value: 0, disabled: true }],
     totalSelling: [{ value: 0, disabled: true }],
   });
 
   filterItems(): void {
-    const value =
-      this.purchaseItemForm.controls.item.value?.toLowerCase() ?? '';
+    const itemControl = this.purchaseItemForm.controls.item;
+
+    if (itemControl.hasError('invalidItem')) {
+      itemControl.setErrors(null);
+    }
+
+    const value = itemControl.value?.toLowerCase() ?? '';
 
     this.filteredItems = this.items.filter((item) =>
       item.toLowerCase().includes(value)
@@ -90,6 +102,19 @@ export class PurchaseBillComponent implements OnInit {
     }
 
     const formValue = this.purchaseItemForm.getRawValue();
+
+    const enteredItem = formValue.item?.trim() ?? '';
+
+    const isValidItem = this.items.some(
+      (item) => item.toLowerCase() === enteredItem.toLowerCase()
+    );
+
+    if (!isValidItem) {
+      this.purchaseItemForm.controls.item.setErrors({
+        invalidItem: true,
+      });
+      return;
+    }
 
     const selectedLocation = this.locations.find(
       (location) => location.locationCode === formValue.locationCode
@@ -171,6 +196,49 @@ export class PurchaseBillComponent implements OnInit {
     });
   }
 
+  
+
+  submitPurchaseBill(): void {
+    if (this.purchaseItems.length === 0) {
+      return;
+    }
+
+    const request = {
+      items: this.purchaseItems.map((item) => ({
+        itemName: item.item,
+        locationCode: item.locationCode,
+        standardCost: item.standardCost,
+        standardPrice: item.standardPrice,
+        quantity: item.quantity,
+        discountPercentage: item.discount,
+      })),
+    };
+
+    this.isSubmitting = true;
+    this.submitSuccess = '';
+    this.submitError = '';
+
+    this.purchaseBillService.createPurchaseBill(request).subscribe({
+      next: (response) => {
+        this.isSubmitting = false;
+
+        this.submitSuccess =
+          `Purchase Bill #${response.id} saved successfully.`;
+
+        this.purchaseItems = [];
+
+        console.log('Purchase Bill created:', response);
+      },
+
+      error: (error) => {
+        this.isSubmitting = false;
+        this.submitError = 'Failed to save Purchase Bill.';
+
+        console.error('Purchase Bill creation failed:', error);
+      },
+    });
+  }
+
   private setupCalculations(): void {
     this.purchaseItemForm.valueChanges.subscribe(() => {
       this.calculateTotals();
@@ -190,8 +258,16 @@ export class PurchaseBillComponent implements OnInit {
     const discount =
       Number(this.purchaseItemForm.controls.discount.value) || 0;
 
-    const totalCost = (standardCost * quantity) - discount;
-    const totalSelling = standardPrice * quantity;
+    const subtotalCost = standardCost * quantity;
+
+    const discountAmount =
+      subtotalCost * (discount / 100);
+
+    const totalCost =
+      subtotalCost - discountAmount;
+
+    const totalSelling =
+      standardPrice * quantity;
 
     this.purchaseItemForm.controls.totalCost.setValue(totalCost, {
       emitEvent: false,
