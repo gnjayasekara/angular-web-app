@@ -1,4 +1,5 @@
 import {
+  ChangeDetectorRef,
   Component,
   HostListener,
   inject,
@@ -14,6 +15,8 @@ import { LocationService } from '../../core/services/location.service';
 import { Location } from '../../models/location.model';
 
 import { PurchaseBillService } from '../../core/services/purchase-bill.service';
+import { Router } from '@angular/router';
+import { AuthService } from '../../core/services/auth.service';
 
 interface PurchaseItemRow {
   item: string;
@@ -38,6 +41,11 @@ export class PurchaseBillComponent implements OnInit {
   private fb = inject(FormBuilder);
   private locationService = inject(LocationService);
   private purchaseBillService = inject(PurchaseBillService);
+
+  private authService = inject(AuthService);
+  private router = inject(Router); 
+
+  private cdr = inject(ChangeDetectorRef);
 
 
   locations: Location[] = [];
@@ -183,14 +191,22 @@ export class PurchaseBillComponent implements OnInit {
     this.isLoadingLocations = true;
     this.locationError = '';
 
+    this.purchaseItemForm.controls.locationCode.disable();
+
     this.locationService.getLocations().subscribe({
       next: (locations) => {
+
         this.locations = locations;
         this.isLoadingLocations = false;
+
+        this.purchaseItemForm.controls.locationCode.enable();
       },
       error: (error) => {
         this.isLoadingLocations = false;
         this.locationError = 'Failed to load locations.';
+
+        this.purchaseItemForm.controls.locationCode.disable();
+
         console.error('Location loading failed:', error);
       },
     });
@@ -227,12 +243,16 @@ export class PurchaseBillComponent implements OnInit {
 
         this.purchaseItems = [];
 
+        this.cdr.detectChanges();
+
         console.log('Purchase Bill created:', response);
       },
 
       error: (error) => {
         this.isSubmitting = false;
         this.submitError = 'Failed to save Purchase Bill.';
+
+        this.cdr.detectChanges();
 
         console.error('Purchase Bill creation failed:', error);
       },
@@ -275,6 +295,20 @@ export class PurchaseBillComponent implements OnInit {
 
     this.purchaseItemForm.controls.totalSelling.setValue(totalSelling, {
       emitEvent: false,
+    });
+  }
+  logout(): void {
+    this.authService.logout().subscribe({
+      next: () => {
+        this.router.navigate(['/login']);
+      },
+      error: (error) => {
+        console.error('Logout failed:', error);
+
+        // Even if the server logout request fails,
+        // return the user to the login page.
+        this.router.navigate(['/login']);
+      },
     });
   }
 }

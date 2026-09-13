@@ -5,6 +5,13 @@
       <p class="text-sm text-gray-500">
         Enter information for the Purchase Bill
       </p>
+      <button
+        type="button"
+        (click)="logout()"
+        class="px-4 py-2 text-sm font-medium border border-gray-300 rounded-md hover:bg-gray-50"
+      >
+        Logout
+      </button>
     </div>
 
     <div class="p-6">
@@ -68,14 +75,13 @@
 
             <select
             formControlName="locationCode"
-            [disabled]="isLoadingLocations"
             class="w-full border rounded px-3 py-2"
             >
               <option value="">
                     {{ isLoadingLocations ? 'Loading locations...' : 'Select location' }}
                 </option>
 
-              @for (location of locations; track location.id) {
+              @for (location of locations; track $index) {
                 <option [value]="location.locationCode">
                   {{ location.locationName }}
                 </option>
