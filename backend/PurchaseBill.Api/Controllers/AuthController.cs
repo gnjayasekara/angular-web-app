@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using PurchaseBill.Api.DTOs.Auth;
 using PurchaseBill.Api.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 
 namespace PurchaseBill.Api.Controllers;
 
@@ -15,6 +16,17 @@ public class AuthController : ControllerBase
         _authService = authService;
     }
 
+    
+    [Authorize]
+    [HttpGet("me")]
+    public IActionResult Me()
+    {
+        return Ok(new
+        {
+            authenticated = true
+        });
+    }
+
     [HttpPost("login")]
     public async Task<IActionResult> Login(LoginRequestDto loginRequest)
     {
@@ -22,7 +34,26 @@ public class AuthController : ControllerBase
         {
             var result = await _authService.LoginAsync(loginRequest);
 
-            return Ok(result);
+            Response.Cookies.Append(
+                "access_token",
+                result.Token,
+                new CookieOptions
+                {
+                    HttpOnly = true,
+                    Secure = false, // local HTTP only
+                    SameSite = SameSiteMode.Lax,
+                    Expires = DateTimeOffset.UtcNow.AddHours(1)
+                }
+            );
+
+            return Ok(new
+            {
+                result.UserCode,
+                result.DisplayName,
+                result.Email,
+                result.CompanyCode,
+                result.Locations
+            });
         }
         catch (HttpRequestException ex)
         {
@@ -46,5 +77,23 @@ public class AuthController : ControllerBase
                 }
             );
         }
+    }
+    [HttpPost("logout")]
+    public IActionResult Logout()
+    {
+        Response.Cookies.Delete(
+            "access_token",
+            new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = false,
+                SameSite = SameSiteMode.Lax
+            }
+        );
+
+        return Ok(new
+        {
+            message = "Logged out successfully."
+        });
     }
 }
