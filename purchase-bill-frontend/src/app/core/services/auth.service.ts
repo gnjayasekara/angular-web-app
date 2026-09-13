@@ -1,39 +1,39 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, tap } from 'rxjs';
+import { Observable } from 'rxjs';
+import { LoginRequest, LoginResponse } from '../../models/auth.models';
 
-import {
-  LoginRequest,
-  LoginResponse,
-} from '../../models/auth.models';
-
-@Injectable({
-  providedIn: 'root',
-})
+@Injectable({ providedIn: 'root' })
 export class AuthService {
   private http = inject(HttpClient);
-
   private readonly apiUrl = 'http://localhost:5035/api/auth';
 
   login(request: LoginRequest): Observable<LoginResponse> {
-    return this.http
-      .post<LoginResponse>(`${this.apiUrl}/login`, request)
-      .pipe(
-        tap((response) => {
-          localStorage.setItem('token', response.token);
-        })
-      );
+    return this.http.post<LoginResponse>(
+      `${this.apiUrl}/login`,
+      request,
+      {
+        withCredentials: true,
+      }
+    );
   }
 
-  getToken(): string | null {
-    return localStorage.getItem('token');
+  checkAuth(): Observable<{ authenticated: boolean }> {
+    return this.http.get<{ authenticated: boolean }>(
+      `${this.apiUrl}/me`,
+      {
+        withCredentials: true,
+      }
+    );
   }
 
-  isLoggedIn(): boolean {
-    return !!this.getToken();
-  }
-
-  logout(): void {
-    localStorage.removeItem('token');
+  logout(): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(
+      `${this.apiUrl}/logout`,
+      {},
+      {
+        withCredentials: true,
+      }
+    );
   }
 }
