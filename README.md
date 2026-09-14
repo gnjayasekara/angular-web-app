@@ -68,8 +68,8 @@ ng version
 ## 1. Clone the Repository
 
 ``` powershell
-git clone <YOUR_GITHUB_REPOSITORY_URL>
-cd <YOUR_REPOSITORY_FOLDER>
+git clone https://github.com/gnjayasekara/angular-web-app.git
+cd <YOUR_REPOSITORY_FOLDER>(angular-web-app)
 ```
 
 ## 2. Configure the Backend
@@ -175,7 +175,7 @@ migration history has also been handled correctly. Otherwise, EF Core
 may attempt to create tables that already exist.
 
 If EF Core database setup cannot be used in a particular environment, a
-`PurchaseBillDb_Setup.sql` file can be provided in the repository as a
+`PurchaseBillDb_Setup.sql` file is provided in the repository as a
 manual fallback.
 
 In that case, open the SQL file in SQL Server Management Studio, connect
@@ -218,8 +218,7 @@ Verify that the setting exists:
 dotnet user-secrets list
 ```
 
-Do not place the JWT signing key, login passwords, or other secrets in
-source control.
+
 
 The non-secret JWT settings can remain in application configuration:
 
