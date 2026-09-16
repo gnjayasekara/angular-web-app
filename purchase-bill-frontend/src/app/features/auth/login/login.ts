@@ -1,4 +1,8 @@
-import { Component, inject } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  inject,
+} from '@angular/core';
 import {
   FormBuilder,
   ReactiveFormsModule,
@@ -22,6 +26,7 @@ export class LoginComponent {
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
   private router = inject(Router);
+  private cdr = inject(ChangeDetectorRef);
 
  
 
@@ -32,6 +37,14 @@ export class LoginComponent {
     email: ['', [Validators.required, Validators.email]],
     password: ['', Validators.required],
   });
+
+  constructor() {
+    this.loginForm.valueChanges.subscribe(() => {
+      if (this.errorMessage) {
+        this.errorMessage = '';
+      }
+    });
+  }
 
   onSubmit(): void {
     if (this.loginForm.invalid) {
@@ -62,9 +75,15 @@ export class LoginComponent {
 
         console.error('Login failed:', error);
 
-        this.errorMessage =
-          error.error?.message ||
-          'Login failed. Please check your credentials.';
+        if (error.status === 401) {
+          this.errorMessage = 'Invalid email or password.';
+        } else {
+          this.errorMessage =
+            error.error?.message ||
+            'Login failed. Please try again.';
+        }
+
+        this.cdr.detectChanges();
       },
     });
   }

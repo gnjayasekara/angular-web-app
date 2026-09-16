@@ -55,6 +55,13 @@ public class AuthController : ControllerBase
                 result.Locations
             });
         }
+        catch (UnauthorizedAccessException)
+        {
+            return Unauthorized(new
+            {
+                message = "Invalid email or password."
+            });
+        }
         catch (HttpRequestException ex)
         {
             return StatusCode(
