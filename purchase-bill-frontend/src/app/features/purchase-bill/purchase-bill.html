@@ -175,6 +175,24 @@
               formControlName="discount"
               class="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
             />
+
+            @if (
+              purchaseItemForm.controls.discount.touched &&
+              purchaseItemForm.controls.discount.hasError('min')
+            ) {
+              <p class="text-sm text-red-600">
+                Discount cannot be less than 0%.
+              </p>
+            }
+
+            @if (
+              purchaseItemForm.controls.discount.touched &&
+              purchaseItemForm.controls.discount.hasError('max')
+            ) {
+              <p class="text-sm text-red-600">
+                Discount cannot exceed 100%.
+              </p>
+            }
           </div>
 
           <div>
