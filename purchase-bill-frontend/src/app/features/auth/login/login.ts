@@ -67,7 +67,7 @@ export class LoginComponent {
 
         console.log('Login successful:', response);
 
-        this.router.navigate(['/purchase-bill']);
+        this.router.navigate(['/dashboard']);
       },
 
       error: (error) => {
