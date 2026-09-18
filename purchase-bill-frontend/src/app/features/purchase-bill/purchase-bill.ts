@@ -15,7 +15,7 @@ import { LocationService } from '../../core/services/location.service';
 import { Location } from '../../models/location.model';
 
 import { PurchaseBillService } from '../../core/services/purchase-bill.service';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 
 interface PurchaseItemRow {
@@ -33,7 +33,7 @@ interface PurchaseItemRow {
 @Component({
   selector: 'app-purchase-bill',
   standalone: true,
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, RouterLink],
   templateUrl: './purchase-bill.html',
   styleUrl: './purchase-bill.css',
 })
