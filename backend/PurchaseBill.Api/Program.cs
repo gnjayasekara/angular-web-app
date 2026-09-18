@@ -6,6 +6,8 @@ using PurchaseBill.Api.Data;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using PurchaseBill.Api.Services;
+using PurchaseBill.Api.Services.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -45,6 +47,8 @@ builder.Services.AddScoped<ILocationService, LocationService>();
 builder.Services.AddScoped<IPurchaseBillService, PurchaseBillService>();
 
 builder.Services.AddScoped<ITokenService, TokenService>();
+
+builder.Services.AddScoped<IDashboardService, DashboardService>();
 
 // OpenAPI
 builder.Services.AddOpenApi();

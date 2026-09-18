@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { LoginComponent } from './features/auth/login/login';
 import { authGuard } from './core/guards/auth.guard';
+import { DashboardComponent } from './pages/dashboard/dashboard';
 
 export const routes: Routes = [
   {
@@ -13,6 +14,11 @@ export const routes: Routes = [
     component: LoginComponent,
   },
   {
+    path: 'dashboard',
+    component: DashboardComponent,
+    canActivate: [authGuard],
+  },
+  {
     path: 'purchase-bill',
     canActivate: [authGuard],
     loadComponent: () =>
@@ -20,4 +26,5 @@ export const routes: Routes = [
         (m) => m.PurchaseBillComponent
       ),
   },
+  
 ];
